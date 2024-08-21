@@ -18,7 +18,7 @@ RUN apt-get update --yes && \
 # Installing python packages
 USER ${NB_UID}
 RUN conda create -y --name versaille python=3.8
-RUN conda install -n versaille -y pytorch cpuonly -c pytorch &&\
+RUN conda run -n versaille pip install torch --index-url https://download.pytorch.org/whl/cpu &&\
     conda install -n versaille -y onnx==1.9 onnxruntime==1.18.0 &&\
     conda install -n versaille -y gym stable-baselines3==2.0 &&\
     conda install -n versaille -y -c anaconda ipykernel
