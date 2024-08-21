@@ -15,6 +15,16 @@ RUN apt-get update --yes && \
     build-essential &&\
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Installing python packages
+USER ${NB_UID}
+RUN conda create -y --name versaille python=3.8
+RUN conda install -n versaille -y pytorch cpuonly -c pytorch &&\
+    conda install -n versaille -y onnx==1.9 onnxruntime==1.18.0 &&\
+    conda install -n versaille -y gym stable-baselines3==2.0 &&\
+    conda install -n versaille -y -c anaconda ipykernel
+RUN conda run -n versaille python -m ipykernel install --user --name=versaille
+USER root
+
 RUN mkdir -p /data && chmod 777 /data && mkdir -p /software && chmod 777 /software
 
 # Julia dependencies
@@ -30,7 +40,7 @@ USER ${NB_UID}
 RUN /opt/setup-scripts/setup-julia-packages.bash
 
 # Download & Install NCubeV
-ENV NCUBEV_VERSION=d54a7bb
+ENV NCUBEV_VERSION=04baf18
 RUN cd /software &&\
     git clone https://github.com/samysweb/NCubeV &&\
     cd NCubeV &&\
@@ -49,7 +59,6 @@ RUN ln -s /software/NCubeV/deps/NCubeV/bin/NCubeV /usr/local/bin/NCubeV
 ENV JULIA_PROJECT=/software/NCubeV
 
 USER ${NB_UID}
-
 
 
 WORKDIR /data

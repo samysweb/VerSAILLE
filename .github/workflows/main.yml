@@ -13,11 +13,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          - linux/amd64
-          - linux/arm/v6
-          - linux/arm/v7
-          - linux/arm64
+        include:
+          # When/If native linux/arm64 runners become available on the free plan,
+          # this can be updated to choose the corresponding image...
+          - platform: linux/amd64
+          - platform: linux/arm64
     steps:
       - name: Prepare
         run: |
@@ -50,6 +50,8 @@ jobs:
           context: "{{defaultContext}}:technical/docker/"
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=registry,ref=${{ env.REGISTRY_IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY_IMAGE }}:buildcache,mode=max
       
       - name: Export digest
         run: |
