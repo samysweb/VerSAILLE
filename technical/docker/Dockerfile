@@ -40,7 +40,7 @@ USER ${NB_UID}
 RUN /opt/setup-scripts/setup-julia-packages.bash
 
 # Download & Install NCubeV
-ENV NCUBEV_VERSION=8aa16ef
+ENV NCUBEV_VERSION=7a1150c
 RUN cd /software &&\
     git clone https://github.com/samysweb/NCubeV &&\
     cd NCubeV &&\
