@@ -1,6 +1,14 @@
 # VerSAILLE & Mosaic
+
+[![container build](https://github.com/samysweb/VerSAILLE/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/samysweb/VerSAILLE/actions/workflows/main.yml)
+
 Welcome to the teaching materials repository for VerSAILLE and Mosaic.
 This repository is meant to provide resources for learning about [VerSAILLE & Mosaic](https://arxiv.org/abs/2402.10998) --- a combination of techniques that admits using the rigorous mathematical foundations of [differential dynamic logic](https://link.springer.com/book/10.1007/978-3-319-63588-0) ($d\mathcal{L}$) to reason about neural network control systems.
+
+Let us start with some terminology:
+- **VerSAILLE** is the theoretical framework that helps us to come up with correct-by-construction verification properties for Neural Networks deployed in control systems.
+- **Mosaic** is an abstract framework for lifting off-the-shelf Open-Loop Neural Network Verification Tools to the task of verifying polynomial arithmetic specifications of arbitrary propositional structure. The framework preserves a verifier's completeness.
+- $\mathbf{N^3V}$ is a concrete implementation of the Mosaic framework for $\mathrm{ReLU}$ neural networks and internally uses [nnenum](https://github.com/stanleybak/nnenum/).
 
 ## Getting Started
 1. Please follow the [installation instructions](INSTALLATION.md)
