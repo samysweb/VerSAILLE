@@ -12,6 +12,18 @@ Let us start with some terminology:
 
 ## Getting Started
 1. Please follow the [installation instructions](INSTALLATION.md)
+2. After starting the container (see installation instruction), open the following link in your browser:  
+   [http://127.0.0.1:8888/lab?token=versaille](http://127.0.0.1:8888/lab?token=versaille)
+3. This should open a Jupyter Notebook Instance where [Intro.ipynb](http://127.0.0.1:8888/lab/tree/Training.ipynb?token=versaille) tells you about the next steps.
+
+**Note on files in Docker Container:**  
+By default, Docker will create a *volume*, i.e. a persistent storage, on your computer which will store all data contained in your Jupyter Lab working directory (`/data`).
+- To copy data from the docker container to your computer use the following instructions:  
+  ```bash
+  > CID=$(docker run -d -p 8888:8888 samweb/versaille)
+  docker cp $CID:/data/<File I want to copy> ./<where I want to copy it to>
+  ```
+- To change this default behavior, you can use [mounts](https://docs.docker.com/engine/storage/bind-mounts/)
 
 ## Literature
 To learn more about the topics covered in this repository, there exist various pieces of literature:

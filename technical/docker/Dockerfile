@@ -18,10 +18,12 @@ RUN apt-get update --yes && \
 # Installing python packages
 USER ${NB_UID}
 RUN conda create -y --name versaille python=3.8
-RUN conda run -n versaille pip install torch==2.4 --index-url https://download.pytorch.org/whl/cpu &&\
+RUN conda run -n versaille pip install numpy==1.22.4 &&\
+    conda run -n versaille pip install torch==2.4 --index-url https://download.pytorch.org/whl/cpu &&\
     conda install -n versaille -y onnx==1.9 onnxruntime==1.18.0 &&\
-    conda run -n versaille pip install stable-baselines3>=2.3 gymnasium    &&\
-    conda install -n versaille -y -c anaconda ipykernel
+    conda run -n versaille pip install stable-baselipynes3>=2.3 gymnasium    &&\
+    conda install -n versaille -y -c anaconda ipykernel &&\
+    conda run -n versaille pip install moviepy pygame
 USER root
 
 RUN mkdir -p /data && chmod 777 /data && mkdir -p /software && chmod 777 /software
@@ -63,3 +65,6 @@ RUN conda run -n versaille python -m ipykernel install --user --name=versaille
 
 
 WORKDIR /data
+COPY ./contents/* /data/
+VOLUME /data
+CMD ["start-notebook.py", "--NotebookApp.token='versaille'"]
