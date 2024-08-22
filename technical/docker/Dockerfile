@@ -22,7 +22,6 @@ RUN conda run -n versaille pip install torch==2.4 --index-url https://download.p
     conda install -n versaille -y onnx==1.9 onnxruntime==1.18.0 &&\
     conda run -n versaille pip install stable-baselines3>=2.3 gymnasium    &&\
     conda install -n versaille -y -c anaconda ipykernel
-RUN conda run -n versaille python -m ipykernel install --user --name=versaille
 USER root
 
 RUN mkdir -p /data && chmod 777 /data && mkdir -p /software && chmod 777 /software
@@ -59,6 +58,8 @@ RUN ln -s /software/NCubeV/deps/NCubeV/bin/NCubeV /usr/local/bin/NCubeV
 ENV JULIA_PROJECT=/software/NCubeV
 
 USER ${NB_UID}
+# Install Python Versaille Kernel
+RUN conda run -n versaille python -m ipykernel install --user --name=versaille
 
 
 WORKDIR /data
