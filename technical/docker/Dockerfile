@@ -20,7 +20,7 @@ USER ${NB_UID}
 RUN conda create -y --name versaille python=3.8
 RUN conda run -n versaille pip install numpy==1.22.4 &&\
     conda run -n versaille pip install torch==2.4 --index-url https://download.pytorch.org/whl/cpu &&\
-    conda install -n versaille -y onnx==1.9 onnxruntime==1.18.0 &&\
+    conda install -n versaille -y onnx==1.12 onnxruntime==1.18.0 &&\
     conda run -n versaille pip install stable-baselines3>=2.3 gymnasium    &&\
     conda install -n versaille -y -c anaconda ipykernel &&\
     conda run -n versaille pip install moviepy pygame
