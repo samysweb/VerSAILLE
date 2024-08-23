@@ -65,6 +65,6 @@ RUN conda run -n versaille python -m ipykernel install --user --name=versaille
 
 
 WORKDIR /data
-COPY ./contents/* /data/
+COPY ./contents/ /data/
 VOLUME /data
 CMD ["start-notebook.py", "--NotebookApp.token='versaille'"]
