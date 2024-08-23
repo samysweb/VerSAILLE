@@ -17,10 +17,10 @@ Let us start with some terminology:
 3. This should open a Jupyter Notebook Instance where [Intro.ipynb](http://127.0.0.1:8888/lab/tree/Training.ipynb?token=versaille) tells you about the next steps.
 
 **Note on files in Docker Container:**  
-By default, Docker will create a *volume*, i.e. a persistent storage, on your computer which will store all data contained in your Jupyter Lab working directory (`/data`).
+When called as explained in [INSTALLATION.md](INSTALLATION.md), Docker will create a *volume* `vdata`, i.e. a persistent storage, on your computer which will store all data contained in your Jupyter Lab working directory (`/data`). This way, when you start the container again (using the same command) your data *should* still be there (unless you cleaned up your docker installation.)
 - To copy data from the docker container to your computer use the following instructions:  
   ```bash
-  > CID=$(docker run -d -p 8888:8888 samweb/versaille)
+  > CID=$(docker run -d -v vdata:/data/ -p 8888:8888 samweb/versaille)
   docker cp $CID:/data/<File I want to copy> ./<where I want to copy it to>
   ```
 - To change this default behavior, you can use [mounts](https://docs.docker.com/engine/storage/bind-mounts/)
