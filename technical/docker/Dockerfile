@@ -58,6 +58,8 @@ RUN ln -s /software/NCubeV/deps/NCubeV/bin/NCubeV /usr/local/bin/NCubeV
 #RUN ln -s /software/NCubeV/deps/NCubeV/lib /opt/julia-1.10.4/lib
 
 ENV JULIA_PROJECT=/software/NCubeV
+COPY ./NCubeV /usr/local/bin/NCubeV
+RUN chmod 777 /usr/local/bin/NCubeV
 
 USER ${NB_UID}
 # Install Python Versaille Kernel
@@ -66,5 +68,8 @@ RUN conda run -n versaille python -m ipykernel install --user --name=versaille
 
 WORKDIR /data
 COPY ./contents/ /data/
+USER root
+RUN chmod -R 777 /data
+USER ${NB_UID}
 VOLUME /data
 CMD ["start-notebook.py", "--NotebookApp.token='versaille'"]
