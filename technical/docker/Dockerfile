@@ -58,11 +58,12 @@ USER root
 #RUN ln -s /software/NCubeV/deps/NCubeV/lib /opt/julia-1.10.4/lib
 
 ENV JULIA_PROJECT=/software/NCubeV
-RUN julia -E 'using Pkg;Pkg.add(["IJulia","Plots"]);using IJulia;installkernel("Julia Versaille", "--depwarn=no");using Conda;Conda.pip("install","polytope==0.2.3");Pkg.precompile()'
 COPY ./NCubeV /usr/local/bin/NCubeV
 RUN chmod 777 /usr/local/bin/NCubeV
 
 USER ${NB_UID}
+# Install Julia Versaille Kernel
+RUN julia -E 'using Pkg;Pkg.add(["IJulia","Plots"]);using IJulia;installkernel("Julia Versaille", "--depwarn=no");using Conda;Conda.pip("install","polytope==0.2.3");Pkg.precompile()'
 # Install Python Versaille Kernel
 RUN conda run -n versaille python -m ipykernel install --user --name=Python_Versaille
 
