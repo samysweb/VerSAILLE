@@ -1,7 +1,8 @@
 # Tag from 19th of August 2024
-FROM quay.io/jupyter/minimal-notebook:ubuntu-22.04
+FROM quay.io/jupyter/minimal-notebook:2024-08-19
+    #ubuntu-22.04
 
-FROM quay.io/jupyter/base-notebook:ubuntu-22.04
+FROM quay.io/jupyter/base-notebook:2024-08-19
 USER root
 COPY --from=0 /opt/setup-scripts/ /opt/setup-scripts
 RUN apt-get update --yes && \
