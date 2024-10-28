@@ -50,7 +50,7 @@ RUN cd /software/NCubeV/ &&\
     ./build.sh $(which julia)
 
 USER root
-RUN ln -s /software/NCubeV/deps/NCubeV/bin/NCubeV /usr/local/bin/NCubeV
+#RUN ln -s /software/NCubeV/deps/NCubeV/bin/NCubeV /usr/local/bin/NCubeV
 #COPY ./julia /software/bin/julia
 #RUN mv /usr/local/bin/julia /usr/local/bin/julia-orig && chmod 777 /software/bin/julia && ln -s /software/bin/julia /usr/local/bin/julia
 #RUN /software/NCubeV/deps/NCubeV/bin/julia --project=/software/NCubeV/ -E 'using Pkg;Pkg.add(["HDF5","IJulia","Pluto"]);Pkg.precompile()'
