@@ -54,7 +54,7 @@ USER root
 #RUN ln -s /software/NCubeV/deps/NCubeV/bin/NCubeV /usr/local/bin/NCubeV
 #COPY ./julia /software/bin/julia
 #RUN mv /usr/local/bin/julia /usr/local/bin/julia-orig && chmod 777 /software/bin/julia && ln -s /software/bin/julia /usr/local/bin/julia
-#RUN /software/NCubeV/deps/NCubeV/bin/julia --project=/software/NCubeV/ -E 'using Pkg;Pkg.add(["HDF5","IJulia","Pluto"]);Pkg.precompile()'
+RUN /software/NCubeV/deps/NCubeV/bin/julia --project=/software/NCubeV/ -E 'using Pkg;Pkg.add(["IJulia","Plots"]);Pkg.precompile();using IJulia;installkernel("Julia Versaille", "--depwarn=no");using Conda;Conda.pip("install","polytope==0.2.3")'
 #RUN mv /opt/julia-1.10.4/lib/ /opt/julia-1.10.4/lib-old
 #RUN ln -s /software/NCubeV/deps/NCubeV/lib /opt/julia-1.10.4/lib
 
@@ -64,7 +64,7 @@ RUN chmod 777 /usr/local/bin/NCubeV
 
 USER ${NB_UID}
 # Install Python Versaille Kernel
-RUN conda run -n versaille python -m ipykernel install --user --name=versaille
+RUN conda run -n versaille python -m ipykernel install --user --name=Python_Versaille
 
 
 WORKDIR /data
