@@ -15,7 +15,7 @@ def show_run(eval_env, model, obs=None, max_steps=1000):
         obs,_ = monitored_env.reset()
     video_name = None
     for _ in range(max_steps):
-        action, _states = model.predict(obs)
+        action, _states = model.predict(obs,deterministic=True)
         obs, reward, done, truncated, info = monitored_env.step(action)
         if video_name is None:
             video_name = monitored_env._video_name

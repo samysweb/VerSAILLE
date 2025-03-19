@@ -33,6 +33,7 @@ class ACCEnv(gym.Env):
         bound = np.array([np.finfo(np.float32).max,np.finfo(np.float32).max])
 
         # Action Space: Choose Acceleration self.A, 0 or self.B
+        # TODO: Change Action Space of the Model
         self.action_space = spaces.Discrete(3)
 
         # State Space: (position, velocity)
@@ -49,6 +50,7 @@ class ACCEnv(gym.Env):
             'render_modes': ['rgb_array'],
             'video.frames_per_second' : 50
         }
+        self.invert_loss = False
 
     def is_crash(self, some_state):
       return some_state[0] <= 0
@@ -58,6 +60,7 @@ class ACCEnv(gym.Env):
         return [seed]
 
     def step(self, action):
+        # What happens when the model takes a step
         assert self.action_space.contains(action), "%s (of type %s) invalid" % (str(action), type(action))
         
         # Get State
@@ -65,6 +68,7 @@ class ACCEnv(gym.Env):
         pos, vel = state[0],state[1]
 
         # Determine acceleration:
+        # TODO: Update choice of acceleration based on changed action space
         acc = 0
         if action==0:
             # Relative Position -> Acceleration decreases relative distance
@@ -107,9 +111,13 @@ class ACCEnv(gym.Env):
             assert False, "Not sure why this should happen, and when it was previously there was a bug in the if/elif guards..."
             reward = 0.0
 
+        if self.invert_loss:
+            reward *= -1.0
+
         return np.array(self.state,dtype=np.float32), reward, done, truncated, {'crash': self.state[0] <= 0}
 
     def reset(self, seed=None,options=None):
+        # If you want to change the state initialization, this is the place to go...
         if seed is not None:
             self._seed(seed=seed)
         if options is not None and "new_state" in options:
@@ -130,6 +138,7 @@ class ACCEnv(gym.Env):
         return np.array(self.state), {'crash': False}
 
     def render(self, mode='rgb_array', close=False):
+        # This determines how our videos are rendered
         assert mode==self.render_mode
         if close:
             if self.viewer is not None:    

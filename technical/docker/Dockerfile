@@ -1,7 +1,8 @@
 # Tag from 19th of August 2024
-FROM quay.io/jupyter/minimal-notebook:ubuntu-22.04
+FROM quay.io/jupyter/minimal-notebook:2024-08-19
+    #ubuntu-22.04
 
-FROM quay.io/jupyter/base-notebook:ubuntu-22.04
+FROM quay.io/jupyter/base-notebook:2024-08-19
 USER root
 COPY --from=0 /opt/setup-scripts/ /opt/setup-scripts
 RUN apt-get update --yes && \
@@ -51,10 +52,9 @@ RUN cd /software/NCubeV/ &&\
     ./build.sh $(which julia)
 
 USER root
-RUN ln -s /software/NCubeV/deps/NCubeV/bin/NCubeV /usr/local/bin/NCubeV
+#RUN ln -s /software/NCubeV/deps/NCubeV/bin/NCubeV /usr/local/bin/NCubeV
 #COPY ./julia /software/bin/julia
 #RUN mv /usr/local/bin/julia /usr/local/bin/julia-orig && chmod 777 /software/bin/julia && ln -s /software/bin/julia /usr/local/bin/julia
-#RUN /software/NCubeV/deps/NCubeV/bin/julia --project=/software/NCubeV/ -E 'using Pkg;Pkg.add(["HDF5","IJulia","Pluto"]);Pkg.precompile()'
 #RUN mv /opt/julia-1.10.4/lib/ /opt/julia-1.10.4/lib-old
 #RUN ln -s /software/NCubeV/deps/NCubeV/lib /opt/julia-1.10.4/lib
 
@@ -63,8 +63,10 @@ COPY ./NCubeV /usr/local/bin/NCubeV
 RUN chmod 777 /usr/local/bin/NCubeV
 
 USER ${NB_UID}
+# Install Julia Versaille Kernel and trigger precompilation as explicitly as possible
+RUN julia -E 'using Pkg;Pkg.add(["IJulia","Plots"]);using IJulia;installkernel("Julia Versaille", "--depwarn=no");using Conda;Conda.pip("install","polytope==0.2.3");Conda.pip("install","matplotlib");Pkg.precompile();using SNNT;using Plots;using PyCall;using JLD'
 # Install Python Versaille Kernel
-RUN conda run -n versaille python -m ipykernel install --user --name=versaille
+RUN conda run -n versaille python -m ipykernel install --user --name=Python_Versaille
 
 
 WORKDIR /data
