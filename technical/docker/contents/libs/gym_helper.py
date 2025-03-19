@@ -6,26 +6,45 @@ import gymnasium as gym
 from stable_baselines3 import PPO
 import torch
 import numpy as np
+import sys
+
+from torch import nn
+
+class NoOutput(object):
+    def __enter__(self):
+        self.out = sys.stdout
+        self.err = sys.stderr
+        self.null = open(os.devnull, "w")
+        sys.stdout = self.null
+        sys.stderr = self.null
+
+    def __exit__(self, type, value, traceback):
+        sys.stdout = self.out
+        sys.stderr = self.err
+        self.null.close()
+        self.null = None
 
 def show_run(eval_env, model, obs=None, max_steps=1000):
-    monitored_env = gym.experimental.wrappers.RecordVideoV0(eval_env, "/tmp/.gym-results/")    
-    if obs is not None:
-        obs,_ = eval_env.reset(options={"new_state":obs})
-    else:
-        obs,_ = monitored_env.reset()
-    video_name = None
-    for _ in range(max_steps):
-        action, _states = model.predict(obs,deterministic=True)
-        obs, reward, done, truncated, info = monitored_env.step(action)
-        if video_name is None:
-            video_name = monitored_env._video_name
-        if done or truncated: break
-    monitored_env.close()
-    video = None
-    with io.open('/tmp/.gym-results/%s.mp4' % video_name, 'r+b') as f:
-        video = f.read()
-    encoded = base64.b64encode(video)
-    os.remove('/tmp/.gym-results/%s.mp4' % video_name)
+    with NoOutput():
+        monitored_env = gym.experimental.wrappers.RecordVideoV0(eval_env, "/tmp/.gym-results/")  
+        monitored_env.unwrapped._seed(42)
+        if obs is not None:
+            obs,_ = monitored_env.reset(options={"new_state":obs})
+        else:
+            obs,_ = monitored_env.reset()
+        video_name = None
+        for _ in range(max_steps):
+            action, _states = model(obs,deterministic=True)
+            obs, reward, done, truncated, info = monitored_env.step(action)
+            if video_name is None:
+                video_name = monitored_env._video_name
+            if done or truncated: break
+        monitored_env.close()
+        video = None
+        with io.open('/tmp/.gym-results/%s.mp4' % video_name, 'r+b') as f:
+            video = f.read()
+        encoded = base64.b64encode(video)
+        os.remove('/tmp/.gym-results/%s.mp4' % video_name)
     return HTML(data='''
         <video width="360" height="auto" alt="test" controls><source src="data:video/mp4;base64,{0}" type="video/mp4" /></video>'''
     .format(encoded.decode('ascii')))
@@ -49,3 +68,22 @@ def extract_onnx(model, save_to):
     dummy_input = torch.randn(1, 2)
     torch.onnx.export(onnxable_model, dummy_input, save_to, opset_version=9)
     print(f"Model saved in {save_to}")
+
+
+def get_env1():
+    # Initialize Training Environment for ACC
+    env = gym.make("acc-discrete-v0")
+    # Invert the reward function...
+    env.unwrapped.invert_loss=True
+    env.unwrapped._seed(42)
+    return env
+
+
+def train_model1(env):
+    # Initialize Agent
+    architecture = dict(pi=[8], vf=[8])
+    bad_model = PPO("MlpPolicy", env, verbose=1,policy_kwargs={"activation_fn":nn.ReLU,"net_arch":architecture})
+    print("Performing some training steps...")
+    bad_model.learn(total_timesteps=2_500)
+    extract_onnx(bad_model,"bad_nn.onnx")
+    return bad_model

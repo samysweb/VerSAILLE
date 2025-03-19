@@ -150,8 +150,19 @@ class ACCEnv(gym.Env):
         screen_width = 1000
         screen_height = 400
 
-        carty = 200 # BOTTOM OF CART
-        cartwidth = 150.0
+        pole_speed = 10  # pixels per frame
+        pole_spacing = 200  # distance between poles in pixels
+        pole_width = 10
+        pole_height = 60
+        
+        cloud_speed = 1  # slower for parallax
+        cloud_spacing = 300
+
+        hill_speed = 2  # Very slow for distant background
+        hill_spacing = 600  # Distance between hills
+
+        carty = 40 # BOTTOM OF CART
+        cartwidth = 250.0
         cartheight = 60.0
         x_scale = (screen_width-100-2*cartwidth)/self.MAX_VALUE
 
@@ -159,10 +170,41 @@ class ACCEnv(gym.Env):
 
         if self.viewer is None:
             pygame.init()
-            self.viewer = pygame.Surface((screen_width, screen_height))
+            self.viewer = pygame.display.set_mode((screen_width, screen_height))
+            #pygame.Surface((screen_width, screen_height))
+
+            self.nn_cart = pygame.image.load("./libs/nn-car.png").convert_alpha()
+            self.front_cart = pygame.image.load("./libs/front-car.png").convert_alpha()
+            original_width, original_height = self.nn_cart.get_size()
+
+            scale_factor = cartwidth / original_width
+            new_height = int(original_height * scale_factor)
+            self.nn_cart = pygame.transform.flip(pygame.transform.smoothscale(self.nn_cart, (cartwidth, new_height)),False,True)
+            self.front_car = pygame.transform.flip(pygame.transform.smoothscale(self.front_cart, (cartwidth, new_height)),False,True)
+
+            self.pole_positions = [x for x in range(0, screen_width + pole_spacing, pole_spacing)]
+            self.cloud_positions = [(x, 300 + 50 * (i % 2)) for i, x in enumerate(range(0, screen_width + cloud_spacing, cloud_spacing))]
+            self.hill_positions = [x for x in range(0, screen_width + hill_spacing, hill_spacing)]
+
+        self.pole_positions = [(x - pole_speed) % (screen_width + pole_spacing) for x in self.pole_positions]
+        self.cloud_positions = [((x - cloud_speed) % (screen_width + cloud_spacing), y) for (x, y) in self.cloud_positions]
+        self.hill_positions = [(x - hill_speed) % (screen_width + hill_spacing) for x in self.hill_positions]
 
         self.surf = pygame.Surface((screen_width, screen_height))
-        self.surf.fill((255, 255, 255))
+        self.surf.fill((135, 206, 235))  # Sky blue background
+
+        # Draw clouds
+        for (x, y) in self.cloud_positions:
+            pygame.draw.ellipse(self.surf, (255, 255, 255), pygame.Rect(x, y, 80, 40))
+
+        for x in self.hill_positions:
+            pygame.draw.ellipse(self.surf, (0, 128, 0), pygame.Rect(x, 10, 400, 120))  # Dark green hills
+        pygame.draw.rect(self.surf, (34, 139, 34), pygame.Rect(0, carty, screen_width, carty))
+        pygame.draw.rect(self.surf, (192, 192, 192), pygame.Rect(0, 0, screen_width, carty))
+
+
+        for x in self.pole_positions:
+            pygame.draw.rect(self.surf, (0, 0, 0), pygame.Rect(x, carty, pole_width, pole_height))
 
         relativeDistance, relativeVelocity = self.state
         followerx = screen_width - 100 - relativeDistance*x_scale - cartwidth
@@ -172,21 +214,16 @@ class ACCEnv(gym.Env):
         l,r = -cartwidth, 0.0
         t,b = cartheight, 0.0
         l += followerx
-        r += followerx
-        t += carty
         b += carty
-        coords = [(l,b), (l,t), (r,t), (r,b)]
-        gfxdraw.filled_polygon(self.surf, coords, (0,0,0))
+        #gfxdraw.filled_polygon(self.surf, coords, (0,0,0))
+        self.surf.blit(self.nn_cart, (l,b))
 
         # Add leader cart
         l,r = -cartwidth, 0.0
         t,b = cartheight, 0.0
         l += leaderx
-        r += leaderx
-        t += carty
         b += carty
-        coords = [(l,b), (l,t), (r,t), (r,b)]
-        gfxdraw.filled_polygon(self.surf, coords, (0,0,0))
+        self.surf.blit(self.front_car, (l,b))
 
         # Display track
         gfxdraw.hline(self.surf, 0, screen_width, carty, (0, 0, 0))
