@@ -17,6 +17,7 @@ RUN apt-get update --yes && \
 
 # Installing python packages
 USER ${NB_UID}
+RUN pip install jupyterlab_sos
 RUN conda create -y --name versaille python=3.8
 RUN conda run -n versaille pip install numpy==1.22.4 &&\
     conda run -n versaille pip install torch==2.4 --index-url https://download.pytorch.org/whl/cpu &&\
