@@ -33,9 +33,11 @@ RUN mkdir -p /data && chmod 777 /data && mkdir -p /software && chmod 777 /softwa
 # Julia dependencies
 # install Julia packages in /opt/julia instead of ${HOME}
 ENV JULIA_DEPOT_PATH=/opt/julia \
-    JULIA_PKGDIR=/opt/julia
+    JULIA_PKGDIR=/opt/julia \
+    JULIA_CPU_TARGET=generic
 
 # Setup Julia
+COPY ./setup_julia.py /opt/setup-scripts/setup_julia.py
 RUN /opt/setup-scripts/setup_julia.py
 
 USER ${NB_UID}
@@ -43,7 +45,7 @@ USER ${NB_UID}
 RUN /opt/setup-scripts/setup-julia-packages.bash
 
 # Download & Install NCubeV
-ENV NCUBEV_VERSION=7a1150c
+ENV NCUBEV_VERSION=0c3c65b
 RUN cd /software &&\
     git clone https://github.com/samysweb/NCubeV &&\
     cd NCubeV &&\
@@ -68,6 +70,8 @@ RUN julia -E 'using Pkg;Pkg.add(["IJulia","Plots"]);using IJulia;installkernel("
 # Install Python Versaille Kernel
 RUN conda run -n versaille python -m ipykernel install --user --name=Python_Versaille
 
+RUN pip install jupyterlab_rise
+RUN pip install jupyterlab_sos
 
 WORKDIR /data
 COPY ./contents/ /data/

@@ -161,6 +161,10 @@ class ACCEnv(gym.Env):
         hill_speed = 2  # Very slow for distant background
         hill_spacing = 600  # Distance between hills
 
+        stripe_width = 40
+        stripe_height = 5
+        stripe_spacing = 80
+
         carty = 40 # BOTTOM OF CART
         cartwidth = 250.0
         cartheight = 60.0
@@ -185,10 +189,24 @@ class ACCEnv(gym.Env):
             self.pole_positions = [x for x in range(0, screen_width + pole_spacing, pole_spacing)]
             self.cloud_positions = [(x, 300 + 50 * (i % 2)) for i, x in enumerate(range(0, screen_width + cloud_spacing, cloud_spacing))]
             self.hill_positions = [x for x in range(0, screen_width + hill_spacing, hill_spacing)]
+            self.stripe_positions = [x for x in range(0, screen_width + stripe_spacing, stripe_spacing)]
 
-        self.pole_positions = [(x - pole_speed) % (screen_width + pole_spacing) for x in self.pole_positions]
-        self.cloud_positions = [((x - cloud_speed) % (screen_width + cloud_spacing), y) for (x, y) in self.cloud_positions]
-        self.hill_positions = [(x - hill_speed) % (screen_width + hill_spacing) for x in self.hill_positions]
+        self.pole_positions = [
+            x - pole_speed if x - pole_speed > -pole_width else screen_width
+            for x in self.pole_positions
+        ]
+        self.cloud_positions = [
+            ((x - cloud_speed) if (x - cloud_speed) > -90 else screen_width, y)
+            for (x, y) in self.cloud_positions
+        ]
+        self.hill_positions = [
+            (x - hill_speed) if (x - hill_speed) > -400 else screen_width
+            for x in self.hill_positions
+        ]
+        self.stripe_positions = [
+            x - pole_speed if x - pole_speed > -stripe_width else screen_width
+            for x in self.stripe_positions
+        ]
 
         self.surf = pygame.Surface((screen_width, screen_height))
         self.surf.fill((135, 206, 235))  # Sky blue background
@@ -214,7 +232,7 @@ class ACCEnv(gym.Env):
         l,r = -cartwidth, 0.0
         t,b = cartheight, 0.0
         l += followerx
-        b += carty
+        b += carty*0.75
         #gfxdraw.filled_polygon(self.surf, coords, (0,0,0))
         self.surf.blit(self.nn_cart, (l,b))
 
@@ -222,11 +240,20 @@ class ACCEnv(gym.Env):
         l,r = -cartwidth, 0.0
         t,b = cartheight, 0.0
         l += leaderx
-        b += carty
+        b += carty*0.75
         self.surf.blit(self.front_car, (l,b))
 
+        stripe_color = (228, 228, 228)  # Yellow stripe
+
+        for x in self.stripe_positions:
+            pygame.draw.rect(
+                self.surf,
+                stripe_color,
+                pygame.Rect(x, 0, stripe_width, stripe_height)
+            )
+
         # Display track
-        gfxdraw.hline(self.surf, 0, screen_width, carty, (0, 0, 0))
+        #gfxdraw.hline(self.surf, 0, screen_width, carty, (0, 0, 0))
         
         self.surf = pygame.transform.flip(self.surf, False, True)
         self.viewer.blit(self.surf, (0, 0))

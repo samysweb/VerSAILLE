@@ -1,0 +1,60 @@
+ArchiveEntry "ACC-Simple"
+Definitions
+/* Time per loop iteration */
+Real T;
+/* Maximal acceleration */
+Real A;
+/* Braking acceleration */
+Real B;
+End.
+ProgramVariables
+/* Network outputs */
+Real x1;
+Real x2;
+Real x3;
+/* Relative position of car */
+Real prel;
+/* Relative velocity of car */
+Real vrel;
+/* Relative acceleration of car */
+Real arel;
+End.
+Problem
+(
+    T>0 & A > 0 & B > 0 &
+    prel >= 0 & prel >= vrel^2 / (2*B)
+)
+->
+[{
+    /* Behavior of controller */
+    x1:=*;x2:=*;x3:=*;
+    {
+        {
+            ?(x1>=x2&x1>=x3);
+            ?(
+                prel + T*vrel + (-A)*T^2/2 >= (vrel + T*(-A))^2 / (2*B) &
+                ((-2*vrel/(-A)) > T | (prel+(-2*vrel/(-A))*vrel + (-2*vrel/(-A))^2*(-A)/2 >= (vrel + (-2*vrel/(-A))*(-A))^2 / (2*B)))
+            );
+            arel:=-A;
+        } ++
+        {
+            ?(x2>=x1&x2>=x3);
+            ?(
+                prel + T*vrel >= vrel^2 / (2*B)
+            );
+            arel:=0;
+        } ++
+        {
+            ?(x3>=x2&x3>=x1);
+            ?(
+                prel + T*vrel + B*T^2/2 >= (vrel+T*B)^2 / (2*B) &
+                ((-2*vrel/B) > T | (prel+(-2*vrel/B)*vrel + (-2*vrel/B)^2*B/2 >= (vrel+(-2*vrel/B)*B)^2 / (2*B)))
+            );
+            arel:=B;
+        }
+    };
+    t:=0;
+    {prel'=vrel,vrel'=arel,t'=1&t<=T}
+}*@invariant(prel >= vrel^2 / (2*B))] (prel >= 0)
+End.
+End.

@@ -9,24 +9,30 @@ import numpy as np
 import sys
 
 from torch import nn
+import onnxruntime as ort
 
 class NoOutput(object):
+    def __init__(self,active=True):
+        self.active = active
+    
     def __enter__(self):
-        self.out = sys.stdout
-        self.err = sys.stderr
-        self.null = open(os.devnull, "w")
-        sys.stdout = self.null
-        sys.stderr = self.null
+        if self.active:
+            self.out = sys.stdout
+            self.err = sys.stderr
+            self.null = open(os.devnull, "w")
+            sys.stdout = self.null
+            sys.stderr = self.null
 
     def __exit__(self, type, value, traceback):
-        sys.stdout = self.out
-        sys.stderr = self.err
-        self.null.close()
-        self.null = None
+        if self.active:
+            sys.stdout = self.out
+            sys.stderr = self.err
+            self.null.close()
+            self.null = None
 
 def show_run(eval_env, model, obs=None, max_steps=1000):
-    with NoOutput():
-        monitored_env = gym.experimental.wrappers.RecordVideoV0(eval_env, "/tmp/.gym-results/")  
+    with NoOutput(active=True):
+        monitored_env = gym.wrappers.RecordVideo(eval_env, "/tmp/.gym-results/")  
         monitored_env.unwrapped._seed(42)
         if obs is not None:
             obs,_ = monitored_env.reset(options={"new_state":obs})
@@ -46,7 +52,7 @@ def show_run(eval_env, model, obs=None, max_steps=1000):
         encoded = base64.b64encode(video)
         os.remove('/tmp/.gym-results/%s.mp4' % video_name)
     return HTML(data='''
-        <video width="360" height="auto" alt="test" controls><source src="data:video/mp4;base64,{0}" type="video/mp4" /></video>'''
+        <video style="width=100%" alt="test" controls autoplay><source src="data:video/mp4;base64,{0}" type="video/mp4" /></video>'''
     .format(encoded.decode('ascii')))
 
 class OnnxableActionPolicy(torch.nn.Module):
@@ -87,3 +93,9 @@ def train_model1(env):
     bad_model.learn(total_timesteps=2_500)
     extract_onnx(bad_model,"bad_nn.onnx")
     return bad_model
+
+def load_good_model():
+    ort_sess_orig = ort.InferenceSession("./good_nn.onnx")
+    def inference(x, deterministic=True):
+        return np.argmax(ort_sess_orig.run(None, {"onnx::Gemm_0": [x]})[0]), None
+    return inference
