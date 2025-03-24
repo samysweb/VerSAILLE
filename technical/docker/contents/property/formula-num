@@ -14,21 +14,12 @@ BOUND <= delta3 & delta3 <= BOUND
 (
 (x1post+delta1) >= (x2post+delta2) &
 (x1post+delta1) >= (x3post+delta3) &
-prel + T * vrel + (-A) * T^2 / 2 >= (vrel + T * (-A))^2 / (2 * B) &
-(
-  -2 * vrel / (-A) > T |
-  prel + (-2 * vrel / (-A)) * vrel + (-2 * vrel / (-A))^2 * (-A) / 2 >=
-  (vrel + (-2 * vrel / (-A)) * (-A))^2 / (2 * B)
-) |
+(vrel - T*A > 0 | 
+prel + T * vrel + (-A) * T^2 / 2 > (vrel + T * (-A))^2 / (2 * B) ) |
 (x2post+delta2) >= (x1post+delta1) &
 (x2post+delta2) >= (x3post+delta3) &
-prel + T * vrel >= vrel^2 / (2 * B) |
+((vrel > 0) |
+prel + T * vrel > vrel^2 / (2 * B)) |
 (x3post+delta3) >= (x2post+delta2) &
-(x3post+delta3) >= (x1post+delta1) &
-prel + T * vrel + B * T^2 / 2 >= (vrel + T * B)^2 / (2 * B) &
-(
-  -2 * vrel / B > T |
-  prel + (-2 * vrel / B) * vrel + (-2 * vrel / B)^2 * B / 2 >=
-  (vrel + (-2 * vrel / B) * B)^2 / (2 * B)
-)
+(x3post+delta3) >= (x1post+delta1) 
 )
