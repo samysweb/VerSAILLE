@@ -92,6 +92,14 @@ def configure_julia(julia_version: str) -> None:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    julia_url, julia_version = ("https://julialang-s3.julialang.org/bin/linux/x64/1.10/julia-1.10.4-linux-"+unify_aarch64(platform.machine())+".tar.gz",'1.10.4')
+    if platform.machine() == "arm64":
+        julia_url = "https://julialang-s3.julialang.org/bin/mac/aarch64/1.10/julia-1.10.4-macaarch64.tar.gz"
+    elif platform.machine() == "x86_64"
+        julia_url = "https://julialang-s3.julialang.org/bin/linux/x64/1.10/julia-1.10.4-linux-x86_64.tar.gz"
+    elif platform.machine() == "aarch64":
+        julia_url = "https://julialang-s3.julialang.org/bin/linux/aarch64/1.10/julia-1.10.4-linux-aarch64.tar.gz"
+    else:
+        raise Exception("Unknown platform")
+    julia_version = '1.10.4'
     download_julia(julia_url=julia_url)
     configure_julia(julia_version=julia_version)
