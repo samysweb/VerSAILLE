@@ -13,6 +13,7 @@ RUN apt-get update --yes && \
     nano-tiny \
     tzdata \
     unzip \
+    cmake \
     build-essential &&\
     apt-get clean && rm -rf /var/lib/apt/lists/*
 

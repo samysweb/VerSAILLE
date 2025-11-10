@@ -18,8 +18,8 @@ jobs:
           # this can be updated to choose the corresponding image...
           - platform: linux/amd64
             cachetag: linux-amd64
-          #- platform: linux/arm64
-          #  cachetag: linux-arm64
+          - platform: linux/arm64
+            cachetag: linux-arm64
     steps:
       - name: Prepare
         run: |
