@@ -9,7 +9,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -18,8 +18,10 @@ jobs:
           # this can be updated to choose the corresponding image...
           - platform: linux/amd64
             cachetag: linux-amd64
+            os: ubuntu-latest
           - platform: linux/arm64
             cachetag: linux-arm64
+            os: ubuntu-24.04-arm
     steps:
       - name: Prepare
         run: |
