@@ -26,8 +26,8 @@ Pkg.add(["IJulia","Plots"])
 using IJulia
 installkernel("Julia Versaille", "--depwarn=no")
 
-pip("install","polytope==0.2.3")
-pip("install","matplotlib")
+pip("install","polytope==0.2.3",:nnenum)
+pip("install","matplotlib",:nnenum)
 
 Pkg.precompile()
 using NCubeV
