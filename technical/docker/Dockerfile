@@ -44,8 +44,12 @@ USER ${NB_UID}
 # Setup IJulia kernel & other packages
 RUN /opt/setup-scripts/setup-julia-packages.bash
 
+ENV JULIA_DEPOT_PATH=/opt/julia \
+    JULIA_PKGDIR=/opt/julia \
+    JULIA_CPU_TARGET=generic
+
 # Download & Install NCubeV
-ENV NCUBEV_VERSION=b11d551ba8a12757bee6ae773941ea805875aa6a
+ENV NCUBEV_VERSION=6823867
 #0c3c65b
 RUN cd /software &&\
     git clone https://github.com/samysweb/NCubeV &&\
@@ -55,11 +59,6 @@ RUN cd /software/NCubeV/ &&\
     ./build.sh $(which julia)
 
 USER root
-#RUN ln -s /software/NCubeV/deps/NCubeV/bin/NCubeV /usr/local/bin/NCubeV
-#COPY ./julia /software/bin/julia
-#RUN mv /usr/local/bin/julia /usr/local/bin/julia-orig && chmod 777 /software/bin/julia && ln -s /software/bin/julia /usr/local/bin/julia
-#RUN mv /opt/julia-1.10.4/lib/ /opt/julia-1.10.4/lib-old
-#RUN ln -s /software/NCubeV/deps/NCubeV/lib /opt/julia-1.10.4/lib
 
 ENV JULIA_PROJECT=/software/NCubeV
 COPY ./NCubeV /usr/local/bin/NCubeV
