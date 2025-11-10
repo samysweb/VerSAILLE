@@ -55,6 +55,10 @@ RUN cd /software &&\
     git clone https://github.com/samysweb/NCubeV &&\
     cd NCubeV &&\
     git checkout $NCUBEV_VERSION
+
+ENV JULIA_NUM_PRECOMPILE_TASKS=1 \
+    JULIA_CPU_THREADS=1
+
 RUN cd /software/NCubeV/ &&\
     ./build.sh $(which julia)
 
@@ -66,7 +70,8 @@ RUN chmod 777 /usr/local/bin/NCubeV
 
 USER ${NB_UID}
 # Install Julia Versaille Kernel and trigger precompilation as explicitly as possible
-RUN julia -E 'using Pkg;Pkg.add(["IJulia","Plots"]);using IJulia;installkernel("Julia Versaille", "--depwarn=no");using Conda;Conda.pip("install","polytope==0.2.3");Conda.pip("install","matplotlib");Pkg.precompile();using SNNT;using Plots;using PyCall;using JLD'
+COPY setup.jl /software/NCubeV/versaille-setup.jl
+RUN julia --project=/software/NCubeV /software/NCubeV/versaille-setup.jl
 # Install Python Versaille Kernel
 RUN conda run -n versaille python -m ipykernel install --user --name=Python_Versaille
 
