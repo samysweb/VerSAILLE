@@ -14,6 +14,7 @@ RUN apt-get update --yes && \
     tzdata \
     unzip \
     cmake \
+    protobuf-compiler \
     build-essential &&\
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
