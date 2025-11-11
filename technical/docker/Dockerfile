@@ -73,7 +73,7 @@ ENV JULIA_NUM_PRECOMPILE_TASKS=1 \
 USER root
 # ONNX 
 RUN git clone https://github.com/protocolbuffers/protobuf.git /software/protobuf-legacy &&\
-    cd /software/protobuf-legacy/cmake &&\
+    cd /software/protobuf-legacy &&\
     git checkout v3.11.4 &&\
     git submodule update --init --recursive &&\
     ./autogen.sh &&\
