@@ -14,7 +14,7 @@ RUN apt-get update --yes && \
     tzdata \
     unzip \
     cmake \
-    protobuf-compiler \
+    autoconf automake libtool g++ \
     build-essential &&\
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -75,9 +75,13 @@ USER root
 RUN git clone https://github.com/protocolbuffers/protobuf.git /software/protobuf-legacy &&\
     cd /software/protobuf-legacy/cmake &&\
     git checkout v3.11.4 &&\
-    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local .. &&\
-    cmake --build . --target install &&\
-    chmod -R 777 /software/protobuf-legacy
+    git submodule update --init --recursive &&\
+    ./autogen.sh &&\
+    ./configure &&\
+     make &&\
+     make check &&\
+     make install &&\
+     ldconfig
 USER ${NB_UID}
 
 RUN cd /software/NCubeV/ &&\
