@@ -1,7 +1,7 @@
 (
 (0<=prel & prel<=100 & -34 <= vrel & vrel <= 34 &
 -100000 <= x1post & x1post <= 100000  & -100000 <= x2post & x2post <= 100000  & -100000 <= x3post & x3post <= 100000) &
-(prel > 0 & (prel > vrel^2 / (2*B) | vrel > 0))
+(prel > 0 & (prel > 1.2*(vrel^2 / (2*B)) | vrel > 0))
 )
 ->
 (

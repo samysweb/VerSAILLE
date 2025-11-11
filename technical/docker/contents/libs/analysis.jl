@@ -1,4 +1,4 @@
-using SNNT
+using NCubeV
 using JLD
 using Glob
 using PyCall
@@ -18,7 +18,7 @@ function summarize_and_load(folder, prefix)
         end
         append!(results,cur_results["result"])
     end
-    result_summary = SNNT.VerifierInterface.reduce_results(results)
+    result_summary = NCubeV.VerifierInterface.reduce_results(results)
     save("$folder/$prefix-summary.jld","result",result_summary,"args",metadata)
     return (result_summary, metadata)
 end
@@ -96,14 +96,14 @@ function intersect(pc, p1, p2)
     return pc.Polytope(iA, ib)
 end
 
-function acc_bound_fun(rPos)
+function acc_bound_fun(rPos;scaler=1.0)
     # rPos >= rVel^2 / (2*A)
     # =>
     #rVel = 
-    return -sqrt(rPos*2*5.5)
+    return -sqrt((1/scaler)*rPos*2*5.5)
 end
 
-function acc_draw_regions(ce_list;reuse=false,color=:yellow,detailed=true,drawThreshold=0.0)
+function acc_draw_regions(ce_list;reuse=false,color=:yellow,detailed=true,drawThreshold=0.0,scaler=1.0)
     pc = pyimport("polytope")
     first=true
     xpts = range(0.1,100., length=500)
@@ -150,5 +150,5 @@ function acc_draw_regions(ce_list;reuse=false,color=:yellow,detailed=true,drawTh
         end
     end
     println("Supressed the drawing of ",supressed, " tiny regions")
-    return plot!(xpts,acc_bound_fun.(xpts),label="State Space Bound",linecolor="#ffc75f", linewidth=5)
+    return plot!(xpts,acc_bound_fun.(xpts;scaler=scaler),label="State Space Bound",linecolor="#ffc75f", linewidth=5)
 end

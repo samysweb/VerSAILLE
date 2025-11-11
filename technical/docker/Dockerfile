@@ -13,12 +13,24 @@ RUN apt-get update --yes && \
     nano-tiny \
     tzdata \
     unzip \
+    cmake \
+    autoconf automake libtool g++ \
     build-essential &&\
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Installing python packages
 USER ${NB_UID}
+RUN pip install jupyterlab_sos
 RUN conda create -y --name versaille python=3.8
+USER root
+# On ARM onnx requires cmake and protobuf, so we also install protobuf cmake stuff
+RUN git clone https://github.com/protocolbuffers/protobuf.git /software/protobuf &&\
+    cd /software/protobuf/cmake &&\
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local .. &&\
+    cmake --build . --target install &&\
+    chmod -R 777 /software/protobuf
+
+USER ${NB_UID}
 RUN conda run -n versaille pip install numpy==1.22.4 &&\
     conda run -n versaille pip install torch==2.4 --index-url https://download.pytorch.org/whl/cpu &&\
     conda install -n versaille -y onnx==1.12 onnxruntime==1.18.0 &&\
@@ -32,30 +44,50 @@ RUN mkdir -p /data && chmod 777 /data && mkdir -p /software && chmod 777 /softwa
 # Julia dependencies
 # install Julia packages in /opt/julia instead of ${HOME}
 ENV JULIA_DEPOT_PATH=/opt/julia \
-    JULIA_PKGDIR=/opt/julia
+    JULIA_PKGDIR=/opt/julia \
+    JULIA_CPU_TARGET=generic
 
 # Setup Julia
+COPY ./setup_julia.py /opt/setup-scripts/setup_julia.py
 RUN /opt/setup-scripts/setup_julia.py
 
 USER ${NB_UID}
 # Setup IJulia kernel & other packages
 RUN /opt/setup-scripts/setup-julia-packages.bash
 
+ENV JULIA_DEPOT_PATH=/opt/julia \
+    JULIA_PKGDIR=/opt/julia \
+    JULIA_CPU_TARGET=generic
+
 # Download & Install NCubeV
-ENV NCUBEV_VERSION=7a1150c
+ENV NCUBEV_VERSION=6823867
+#0c3c65b
 RUN cd /software &&\
     git clone https://github.com/samysweb/NCubeV &&\
     cd NCubeV &&\
     git checkout $NCUBEV_VERSION
+
+ENV JULIA_NUM_PRECOMPILE_TASKS=1 \
+    JULIA_CPU_THREADS=1
+
+USER root
+# ONNX 
+RUN git clone https://github.com/protocolbuffers/protobuf.git /software/protobuf-legacy &&\
+    cd /software/protobuf-legacy &&\
+    git checkout v3.11.4 &&\
+    git submodule update --init --recursive &&\
+    ./autogen.sh &&\
+    ./configure &&\
+     make &&\
+     make check &&\
+     make install &&\
+     ldconfig
+USER ${NB_UID}
+
 RUN cd /software/NCubeV/ &&\
     ./build.sh $(which julia)
 
 USER root
-#RUN ln -s /software/NCubeV/deps/NCubeV/bin/NCubeV /usr/local/bin/NCubeV
-#COPY ./julia /software/bin/julia
-#RUN mv /usr/local/bin/julia /usr/local/bin/julia-orig && chmod 777 /software/bin/julia && ln -s /software/bin/julia /usr/local/bin/julia
-#RUN mv /opt/julia-1.10.4/lib/ /opt/julia-1.10.4/lib-old
-#RUN ln -s /software/NCubeV/deps/NCubeV/lib /opt/julia-1.10.4/lib
 
 ENV JULIA_PROJECT=/software/NCubeV
 COPY ./NCubeV /usr/local/bin/NCubeV
@@ -63,10 +95,13 @@ RUN chmod 777 /usr/local/bin/NCubeV
 
 USER ${NB_UID}
 # Install Julia Versaille Kernel and trigger precompilation as explicitly as possible
-RUN julia -E 'using Pkg;Pkg.add(["IJulia","Plots"]);using IJulia;installkernel("Julia Versaille", "--depwarn=no");using Conda;Conda.pip("install","polytope==0.2.3");Conda.pip("install","matplotlib");Pkg.precompile();using SNNT;using Plots;using PyCall;using JLD'
+COPY setup.jl /software/NCubeV/versaille-setup.jl
+RUN julia --project=/software/NCubeV /software/NCubeV/versaille-setup.jl
 # Install Python Versaille Kernel
 RUN conda run -n versaille python -m ipykernel install --user --name=Python_Versaille
 
+RUN pip install jupyterlab_rise
+RUN pip install jupyterlab_sos
 
 WORKDIR /data
 COPY ./contents/ /data/
